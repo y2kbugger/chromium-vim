@@ -330,7 +330,10 @@ Vim.onKeyDown = function(ev, nocode) {
   }
   if (!Vim.matchQueue()) {
     Vim.keyQueue = "";
-    return Mappings.convertToAction(key);
+    if (Mappings.convertToAction(key)) {
+      document.activeElement.blur();
+    }
+    return;
   }
   if (Vim.bindingArray.indexOf(Vim.keyQueue) === -1) {
     return;

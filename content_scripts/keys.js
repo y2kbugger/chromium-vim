@@ -140,10 +140,6 @@ Key.down = function(e) {
     return Visual.action(asciiKey.replace(/^<BS>$/, "h").replace(/^<Space>$/, "l"));
   }
 
-  if (insertMode) {
-    return false;
-  }
-
   if (!commandMode && Mappings.actions.inputFocused && e.which === 9 && Vim.mode !== "INSERT") { // When <Tab> or <S-Tab> is pressed in 'gi' mode
     if (document.activeElement && (!document.activeElement.isInput() || !Mappings.actions.inputElements.length)) {
       return Mappings.actions.inputFocused = false;
@@ -164,6 +160,9 @@ Key.down = function(e) {
   }
   if (keyType.escape) {
     return Mappings.handleEscapeKey();
+  }
+  if (insertMode) {
+    return false;
   }
   var isInput = document.activeElement && document.activeElement.isInput();
   if (isInput && document.activeElement !== Command.input && document.getSelection().type !== "None" && document.activeElement.isVisible()) {
