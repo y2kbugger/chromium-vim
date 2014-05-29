@@ -86,6 +86,7 @@ Key.down = function(e) {
     Key.initialKey = null;
   }
 
+
   if (Hints.active) {
     e.stopPropagation();
     if (e.which === 18) {
@@ -111,7 +112,6 @@ Key.down = function(e) {
   if (Command.active && document.activeElement && document.activeElement.id === "cVim-command-bar-input") {
     e.stopPropagation();
   }
-
   var asciiKey = Key.fromKeyCode(e);
 
   if (!asciiKey) {
@@ -140,14 +140,11 @@ Key.down = function(e) {
     return Visual.action(asciiKey.replace(/^<BS>$/, "h").replace(/^<Space>$/, "l"));
   }
 
-  if (keyType.escape) {
-    return Mappings.handleEscapeKey();
-  }
   if (insertMode) {
     return false;
   }
 
-  if (!commandMode && Mappings.actions.inputFocused && e.which === 9) { // When <Tab> or <S-Tab> is pressed in 'gi' mode
+  if (!commandMode && Mappings.actions.inputFocused && e.which === 9 && Vim.mode !== "INSERT") { // When <Tab> or <S-Tab> is pressed in 'gi' mode
     if (document.activeElement && (!document.activeElement.isInput() || !Mappings.actions.inputElements.length)) {
       return Mappings.actions.inputFocused = false;
     }
@@ -161,7 +158,20 @@ Key.down = function(e) {
     return;
   }
 
+  if (document.activeElement && document.activeElement.getAttribute("vimmode")) {
+    Vim.el = document.activeElement;
+    return;
+  }
+  if (keyType.escape) {
+    return Mappings.handleEscapeKey();
+  }
   var isInput = document.activeElement && document.activeElement.isInput();
+  if (isInput && document.activeElement !== Command.input && document.getSelection().type !== "None" && document.activeElement.isVisible()) {
+    if (!document.activeElement.getAttribute("vimmode")) {
+      Vim.init(document.activeElement);
+    }
+  }
+
 
   if (!isInput) {
     if (Mappings.convertToAction(asciiKey)) {
@@ -180,16 +190,16 @@ Key.down = function(e) {
     }
   }
 
-  if (settings && settings.insertmappings && document.activeElement && document.activeElement.isInput() && !keyType.escape && asciiKey !== "" && !(settings.cncpcompletion && asciiKey === "<C-p>" && document.activeElement.id === "cVim-command-bar-input")) { // Handle textbox shortcuts
-    Mappings.insertCommand(asciiKey, function() {
-      e.preventDefault();
-      if (document.activeElement.id === "cVim-command-bar-input" && Command.type !== "search") {
-        window.setTimeout(function() {
-          Command.complete(Command.input.value);
-        }, 0);
-      }
-    });
-  }
+  // if (settings && settings.insertmappings && document.activeElement && document.activeElement.isInput() && !keyType.escape && asciiKey !== "" && !(settings.cncpcompletion && asciiKey === "<C-p>" && document.activeElement.id === "cVim-command-bar-input")) { // Handle textbox shortcuts
+  //   Mappings.insertCommand(asciiKey, function() {
+  //     e.preventDefault();
+  //     if (document.activeElement.id === "cVim-command-bar-input" && Command.type !== "search") {
+  //       window.setTimeout(function() {
+  //         Command.complete(Command.input.value);
+  //       }, 0);
+  //     }
+  //   });
+  // }
 
   if (commandMode && document.activeElement.id === "cVim-command-bar-input") {
 
