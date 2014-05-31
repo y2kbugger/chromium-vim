@@ -189,17 +189,6 @@ and the blacklists text box would have this line:
 | N                       | select the previous search result                                   |                               | 
 | p                       | open highlighted text in current tab                                |                               | 
 | P                       | open highlighted text in new tab                                    |                               | 
-| **Text boxes**          |                                                                     |                               | 
-| &lt;C-i&gt;             | move cursor to the beginning of the line                            | beginningOfLine               | 
-| &lt;C-e&gt;             | move cursor to the end of the line                                  | endOfLine                     | 
-| &lt;C-u&gt;             | delete to the beginning of the line                                 | deleteToBeginning             | 
-| &lt;C-o&gt;             | delete to the end of the line                                       | deleteToEnd                   | 
-| &lt;C-y&gt;             | delete back one word                                                | deleteWord                    | 
-| &lt;C-p&gt;             | delete forward one word                                             | deleteForwardWord             | 
-| &lt;C-h&gt;             | move cursor back one word                                           | backwardWord                  | 
-| &lt;C-l&gt;             | move cursor forward one word                                        | forwardWord                   | 
-| &lt;C-f&gt;             | move cursor forward one letter                                      | forwardChar                   | 
-| &lt;C-b&gt;             | move cursor back one letter                                         | backwardChar                  | 
 
 #Command Mode
 

@@ -9,6 +9,7 @@ Vim.init = function(el) {
   this.setMode("NORMAL");
   this.el.focus();
   this.el.setAttribute("vimmode", true);
+  this.el.setAttribute("vimmodeinactive", true);
   this.el.setAttribute("mode", "NORMAL");
   this.bindingArray = Object.keys(this.bindings);
   this.el.removeEventListener("keydown", this.onKeyDown, false);
@@ -289,18 +290,9 @@ Vim.alias = function(macro) {
 };
 
 Vim.onKeyDown = function(ev, nocode) {
+  var key = nocode ? ev : Vim.fromKeyCode(ev);
   if (!nocode) {
     ev.stopPropagation();
-  }
-  var key = nocode ? ev : Vim.fromKeyCode(ev);
-  if (Vim.mode === "NORMAL" && /^[0-9]$/.test(key)) {
-    if (!(key === "0" && Vim.repeatCount.length === 0)) {
-      Vim.repeatCount += key;
-      if (!nocode) {
-        ev.preventDefault();
-      }
-      return;
-    }
   }
   if (key === "<Esc>" || key === "<C-[>") {
     if (Vim.mode === "VISUAL") {
@@ -317,6 +309,25 @@ Vim.onKeyDown = function(ev, nocode) {
     Vim.keyQueue = "";
     return;
   }
+  if (ev.which === 73 && ev.ctrlKey) {
+    if (this.getAttribute("vimmodeinactive")) {
+      this.removeAttribute("vimmodeinactive");
+    } else {
+      this.setAttribute("vimmodeinactive", true);
+    }
+  }
+  if (this.getAttribute && this.getAttribute("vimmodeinactive")) {
+    return;
+  }
+  if (Vim.mode === "NORMAL" && /^[0-9]$/.test(key)) {
+    if (!(key === "0" && Vim.repeatCount.length === 0)) {
+      Vim.repeatCount += key;
+      if (!nocode) {
+        ev.preventDefault();
+      }
+      return;
+    }
+  }
   if (Vim.mode === "NORMAL" || Vim.mode === "VISUAL") {
     if (ev.which !== 123 && !nocode && key.length === 1) {
       ev.preventDefault();
@@ -330,9 +341,9 @@ Vim.onKeyDown = function(ev, nocode) {
   }
   if (!Vim.matchQueue()) {
     Vim.keyQueue = "";
-    if (Mappings.convertToAction(key)) {
-      document.activeElement.blur();
-    }
+    // if (Mappings.convertToAction(key)) {
+    //   document.activeElement.blur();
+    // }
     return;
   }
   if (Vim.bindingArray.indexOf(Vim.keyQueue) === -1) {

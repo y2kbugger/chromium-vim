@@ -189,17 +189,6 @@ Key.down = function(e) {
     }
   }
 
-  // if (settings && settings.insertmappings && document.activeElement && document.activeElement.isInput() && !keyType.escape && asciiKey !== "" && !(settings.cncpcompletion && asciiKey === "<C-p>" && document.activeElement.id === "cVim-command-bar-input")) { // Handle textbox shortcuts
-  //   Mappings.insertCommand(asciiKey, function() {
-  //     e.preventDefault();
-  //     if (document.activeElement.id === "cVim-command-bar-input" && Command.type !== "search") {
-  //       window.setTimeout(function() {
-  //         Command.complete(Command.input.value);
-  //       }, 0);
-  //     }
-  //   });
-  // }
-
   if (commandMode && document.activeElement.id === "cVim-command-bar-input") {
 
     switch (asciiKey) {

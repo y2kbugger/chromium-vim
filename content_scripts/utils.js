@@ -1,3 +1,34 @@
+function isValidB64(a) {
+  try {
+    window.atob(a);
+  } catch(e) {
+    return false;
+  }
+  return true;
+}
+
+function reverseImagePost(url) {
+  return '<html><head><title>cVim reverse image search</title></head><body><form id="f" method="POST" action="https://www.google.com/searchbyimage/upload" enctype="multipart/form-data"><input type="hidden" name="image_content" value="' + url.substring(url.indexOf(",") + 1).replace(/\+/g, "-").replace(/\//g, "_").replace(/\./g, "=") + '"><input type="hidden" name="filename" value=""><input type="hidden" name="image_url" value=""><input type="hidden" name="sbisrc" value=""></form><script>document.getElementById("f").submit();\x3c/script></body></html>';
+}
+
+// Based off of the "Search by Image" Chrome Extension by Google
+function googleReverseImage(url, source, c, d) {
+  if (void 0 !== url && url.indexOf("data:") === 0) {
+    if (url.search(/data:image\/(bmp|gif|jpe?g|png|webp|tiff|x-ico)/i) === 0) {
+      var commaIndex = url.indexOf(",");
+      if (commaIndex !== -1 && isValidB64(url.substring(commaIndex + 1))) {
+        return "data:text/html;charset=utf-8;base64," + window.btoa(reverseImagePost(url, source));
+      }
+    }
+  } else {
+    if (url.indexOf("file://") === 0 || url.indexOf("chrome") === 0) {
+      chrome.runtime.sendMessage({action: "urlToBase64", url: url});
+      return;
+    }
+    return "https://www.google.com/searchbyimage?image_url=" + url;
+  }
+}
+
 HTMLElement.prototype.isInput = function() {
   return (
       (this.localName === "textarea" || this.localName === "input" || this.getAttribute("contenteditable") === "true") && !this.disabled &&

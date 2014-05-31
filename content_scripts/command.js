@@ -159,6 +159,7 @@ Command.descriptions = [
   ["closetab",   "Close the current tab"],
   ["open",       "Open a link in the current tab"],
   ["nohl",       "Clears the search highlight"],
+  ["file",       "Browse local directories"],
   ["set",        "Configure Settings"],
   ["date",       "Display the current date"],
   ["mksession",  "Create a saved session of current tabs"],
@@ -267,6 +268,17 @@ Command.complete = function(value) {
     return;
   }
 
+  if (/^file +/.test(value)) {
+    if (Marks.lastSearchLength > search.length || !(Marks.lastFileSearch && Marks.lastFileSearch.replace(/[^\/]+$/, "") === search) && (search.slice(-1) === "/" && !(Marks.lastFileSearch && Marks.lastFileSearch.slice(-1) === "/"))) {
+      Marks.lastFileSearch = search;
+      Marks.lastSearchLength = search.length;
+      return chrome.runtime.sendMessage({action: "getFilePath", path: search});
+    } else {
+      Marks.lastFileSearch = search;
+      return Marks.filePath();
+    }
+  }
+
   if (/^b(ook)?marks(\s+)/.test(value)) {
     if (search[0] === "/") {
       return Marks.matchPath(search);
@@ -343,6 +355,8 @@ Command.execute = function(value, repeats) {
         }
       } else if (/^history +/.test(value)) {
         chrome.runtime.sendMessage({action: "openLinkTab", active: activeTab, url: Complete.convertToLink(value), noconvert: true});
+      } else if (/^file +/.test(value)) {
+        chrome.runtime.sendMessage({action: "openLinkTab", active: activeTab, url: "file://" + value.replace(/\S+ +/, ""), noconvert: true});
       } else if (/^(winopen|wo)$/.test(value.replace(/ .*/, ""))) {
         chrome.runtime.sendMessage({action: "openLinkWindow", focused: activeTab, url: Complete.convertToLink(value), repeats: repeats, noconvert: true});
       } else if (/^(to|tabopen)$/.test(value.replace(/ .*/, ""))) {

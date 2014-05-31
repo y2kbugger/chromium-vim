@@ -91,7 +91,10 @@ Hints.dispatchAction = function(link) {
       break;
     case "image":
     case "multiimage":
-      chrome.runtime.sendMessage({action: "openLinkTab", active: false, url: "https://www.google.com/searchbyimage?image_url=" + link.src, noconvert: true});
+      var url = googleReverseImage(link.src, null);
+      if (url) {
+        chrome.runtime.sendMessage({action: "openLinkTab", active: false, url: url, noconvert: true});
+      }
       break;
     case "hover":
       if (Hints.lastHover) {
