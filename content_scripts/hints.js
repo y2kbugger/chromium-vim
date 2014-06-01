@@ -328,15 +328,39 @@ Hints.evaluateLink = function(link) {
   this.linkIndex += 1;
 };
 
+Hints.siteFilters = {
+  domains: ["reddit.com"],
+  reddit: function(node) {
+    if (node.localName === "a" && !node.getAttribute("href")) {
+      return false;
+    }
+    if (node.getAttribute("onclick") && node.getAttribute("onclick").indexOf("click_thing") === 0) {
+      return false;
+    }
+    return node;
+  }
+};
+
 Hints.getLinks = function() {
+  var node, nodes = [];
+  var i;
   var nodeIterator = document.createNodeIterator(document.body, 1, {acceptNode: function(node) {
     if (isClickable(node, Hints.type)) {
       return NodeFilter.FILTER_ACCEPT;
     }
     return NodeFilter.FILTER_REJECT;
-  }}), node;
+  }});
   while (node = nodeIterator.nextNode()) {
-    this.evaluateLink(node);
+    nodes.push(node);
+  }
+  for (i = 0; i < this.siteFilters.domains.length; ++i) {
+    if (window.location.origin.indexOf(this.siteFilters.domains[i]) !== -1) {
+      nodes = nodes.filter(this.siteFilters[this.siteFilters.domains[i].replace(/\..*/, "")]);
+      break;
+    }
+  }
+  for (i = 0; i < nodes.length; ++i) {
+    this.evaluateLink(nodes[i]);
   }
 };
 

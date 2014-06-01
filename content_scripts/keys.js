@@ -86,7 +86,6 @@ Key.down = function(e) {
     Key.initialKey = null;
   }
 
-
   if (Hints.active) {
     e.stopPropagation();
     if (e.which === 18) {
@@ -154,7 +153,7 @@ Key.down = function(e) {
     return;
   }
 
-  if (document.activeElement && document.activeElement.getAttribute("vimmode")) {
+  if (document.activeElement && document.activeElement.getAttribute("vimmode") && !document.activeElement.getAttribute("vimmodeinactive")) {
     Vim.el = document.activeElement;
     return;
   }

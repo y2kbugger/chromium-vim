@@ -33,14 +33,14 @@ Vim.setValue = function(text) {
     this.el.selectionEnd = pos;
     return;
   }
-  pos = this.el.textContent.length - text.length;
+  pos = this.el.value.length - text.length;
   this.selection().setPosition(this.selection().baseNode, pos);
-  this.el.textContent = text;
+  this.el.value = text;
 };
 
 Vim.getSplit = function(offset) {
   if (!offset) {
-    offset = this.selection().baseOffset || this.el.selectionEnd || 0;
+    offset = this.el.selectionEnd;
   }
   var value = this.getValue();
   return [value.substring(0, offset), value.substring(offset)];
@@ -295,6 +295,7 @@ Vim.onKeyDown = function(ev, nocode) {
     ev.stopPropagation();
   }
   if (key === "<Esc>" || key === "<C-[>") {
+    Vim.el.focus();
     if (Vim.mode === "VISUAL") {
       if (Vim.el.selectionDirection === "forward") {
         Vim.selection().collapseToEnd();
@@ -309,7 +310,9 @@ Vim.onKeyDown = function(ev, nocode) {
     Vim.keyQueue = "";
     return;
   }
-  if (ev.which === 73 && ev.ctrlKey) {
+  if (key === "<C-Enter>") {
+    ev.preventDefault();
+    ev.stopPropagation();
     if (this.getAttribute("vimmodeinactive")) {
       this.removeAttribute("vimmodeinactive");
     } else {
@@ -317,6 +320,13 @@ Vim.onKeyDown = function(ev, nocode) {
     }
   }
   if (this.getAttribute && this.getAttribute("vimmodeinactive")) {
+    return;
+  }
+  if (key === "<Tab>" || key === "<S-Tab>") {
+    ev.preventDefault();
+    ev.stopPropagation();
+    Vim.setValue(Vim.getSplit().join("  "));
+    Vim.el.setSelectionRange(Vim.el.selectionStart + 2, Vim.el.selectionEnd + 2);
     return;
   }
   if (Vim.mode === "NORMAL" && /^[0-9]$/.test(key)) {
