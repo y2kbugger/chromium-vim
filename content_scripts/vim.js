@@ -310,7 +310,7 @@ Vim.onKeyDown = function(ev, nocode) {
     Vim.keyQueue = "";
     return;
   }
-  if (key === "<C-Enter>") {
+  if (key === "<C-Space>") {
     ev.preventDefault();
     ev.stopPropagation();
     if (this.getAttribute("vimmodeinactive")) {
