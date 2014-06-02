@@ -269,7 +269,7 @@ Command.complete = function(value) {
   }
 
   if (/^file +/.test(value)) {
-    if (Marks.lastSearchLength > search.length || !(Marks.lastFileSearch && Marks.lastFileSearch.replace(/[^\/]+$/, "") === search) && (search.slice(-1) === "/" && !(Marks.lastFileSearch && Marks.lastFileSearch.slice(-1) === "/"))) {
+    if ((search.slice(-1) === "/" && Marks.lastSearchLength < search.length) || Marks.lastSearchLength > search.length || !(Marks.lastFileSearch && Marks.lastFileSearch.replace(/[^\/]+$/, "") === search) && (search.slice(-1) === "/" && !(Marks.lastFileSearch && Marks.lastFileSearch.slice(-1) === "/"))) {
       Marks.lastFileSearch = search;
       Marks.lastSearchLength = search.length;
       return chrome.runtime.sendMessage({action: "getFilePath", path: search});
