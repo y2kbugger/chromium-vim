@@ -62,7 +62,7 @@ Hints.hideHints = function(reset, multi, useKeyDelay) {
 };
 
 Hints.changeFocus = function() {
-  this.linkArr.forEach(function(item) { item[0].style.zIndex = 1 - parseInt(item[0].style.zIndex); });
+  this.linkArr.forEach(function(item) { item[0].style.zIndex = 1 - +item[0].style.zIndex; });
 };
 
 Hints.removeContainer = function() {

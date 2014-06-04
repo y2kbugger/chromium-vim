@@ -41,7 +41,7 @@ function getVisibleBoundingRect(node) {
   if (computedStyle.opacity === "0" || computedStyle.visibility !== "visible" || computedStyle.display === "none") {
     return false;
   }
-  var boundingRect = node.getBoundingClientRect();
+  var boundingRect = node.getClientRects()[0] || node.getBoundingClientRect();
   if (boundingRect.top > window.innerHeight || boundingRect.left > window.innerWidth) {
     return false;
   }
@@ -52,7 +52,7 @@ function getVisibleBoundingRect(node) {
     var children = node.children;
     var visibleChildNode = false;
     for (var i = 0, l = children.length; i < l; ++i) {
-      boundingRect = children[i].getBoundingClientRect();
+      boundingRect = children[i].getClientRects()[0] || children[i].getBoundingClientRect();
       if (boundingRect.width || boundingRect.height) {
         visibleChildNode = true;
         break;
@@ -86,15 +86,6 @@ function isClickable(node, type) {
         ((t = node.getAttribute("role")) && (t === "button" || t === "checkbox" || t === "menu"))) {
     return true;
   }
-  // if (name === "div" && node.className === "fc-panel") {
-  //   return true;
-  // }
-  // if (getComputedStyle(node).cursor === "pointer") {
-  //   if (!node.offsetParent || (node.offsetParent.style.cursor !== "pointer" && node.offsetParent.localName !== "a" &&
-  //         !/aria|jsaction|role|onclick/.test(Array.prototype.slice.call(node.offsetParent.attributes).map(function(e){return e.name;}).join(",")))) {
-  //     return true;
-  //   }
-  // }
 }
 
 HTMLCollection.prototype.toArray = function() {

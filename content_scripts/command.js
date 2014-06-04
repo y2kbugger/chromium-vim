@@ -72,7 +72,7 @@ Command.history = {
   cycle: function(type, reverse) {
     if (this[type].length === 0) return false;
     var len = this[type].length,
-        index = this.index[type];
+      index = this.index[type];
     if (index === undefined) {
       index = len;
     }
@@ -430,11 +430,11 @@ Command.execute = function(value, repeats) {
             switch (value[0]) {
               case "scrollstep":
                 if (!/^[0-9]+$/.test(value[1])) Status.setMessage("invalid integer: '" + (value[1] || "") + "'", 1, "error");
-                else settings.scrollstep = parseInt(value[1]);
+                else settings.scrollstep = +value[1];
                 break;
               case "searchlimit":
                 if (!/^[0-9]+$/.test(value[1])) Status.setMessage("invalid integer: " + value, 1, "error");
-                else settings.searchlimit = parseInt(value[1]);
+                else settings.searchlimit = +value[1];
                 break;
               case "hintcharacters":
                 value = value[1].split("").unique().join("");
@@ -568,6 +568,7 @@ Command.init = function(enabled) {
   Mappings.shortCuts = Object.clone(Mappings.shortCutsClone);
   Mappings.parseCustom(settings.MAPPINGS);
   if (enabled) {
+    this.loaded = true;
     if (settings.searchengines && !Array.isArray(settings.searchengines) && typeof settings.searchengines === "object") {
       for (key in settings.searchengines) {
         if (Complete.engines.indexOf(key) === -1 && typeof settings.searchengines[key] === "string") {
@@ -581,7 +582,7 @@ Command.init = function(enabled) {
       waitForLoad(Cursor.init, Cursor);
     }
     Scroll.smoothScroll = settings.smoothscroll;
-    Scroll.stepSize = parseInt(settings.scrollstep);
+    Scroll.stepSize = +settings.scrollstep;
     if (settings.hintcharacters.split("").unique().length > 1) {
       settings.hintcharacters = settings.hintcharacters.split("").unique().join("");
     }
@@ -611,8 +612,9 @@ Command.init = function(enabled) {
 };
 
 Command.configureSettings = function(_settings) {
-  
+
   settings = _settings;
+  this.initialLoadStarted = true;
   function checkBlacklist() {
     var blacklists = settings.BLACKLISTS.split("\n"),
         blacklist;
@@ -625,7 +627,7 @@ Command.configureSettings = function(_settings) {
       if (matchLocation(document.URL, blacklist[0])) {
         if (blacklist.length > 1) {
           var unmaps      = blacklist.slice(1),
-              unmapString = "";
+            unmapString = "";
           for (var j = 0, q = unmaps.length; j < q; ++j) {
             unmapString += "\nunmap " + unmaps[j];
           }
@@ -645,7 +647,7 @@ Command.configureSettings = function(_settings) {
     return settings[e].constructor === Boolean;
   });
   removeListeners();
-  settings.searchlimit = parseInt(settings.searchlimit);
+  settings.searchlimit = +settings.searchlimit;
   if (!checkBlacklist()) {
     chrome.runtime.sendMessage({action: "getActiveState"}, function(response) {
       if (response) {
@@ -660,10 +662,10 @@ Command.configureSettings = function(_settings) {
   }
 };
 
-window.addEventListener("focus", function() {
-  window.setTimeout(function() {
-    if (!Command.loaded) {
-      chrome.runtime.sendMessage({action: "getSettings"});
-    }
-  }, 0);
-});
+// window.addEventListener("focus", function() {
+//   window.setTimeout(function() {
+if (!Command.loaded) {
+  chrome.runtime.sendMessage({action: "getSettings"});
+}
+//   }, 0);
+// });

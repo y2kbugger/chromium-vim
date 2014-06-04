@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 window.addEventListener("DOMContentLoaded", function() {
-  if (self === top) {
+  if (self === top && !Command.loaded) {
     chrome.runtime.sendMessage({action: "getSettings"});
     chrome.runtime.sendMessage({action: "isNewInstall"}, function(message) {
       if (message) { // Possible temporary fix for issue #36

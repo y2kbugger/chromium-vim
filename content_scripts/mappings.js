@@ -195,10 +195,10 @@ Mappings.actions   = {
     }
   },
   zoomPageIn: function(repeats) {
-    document.body.style.zoom = (isNaN(parseInt(document.body.style.zoom)) ? 1 : parseFloat(document.body.style.zoom)) + 0.1 * repeats;
+    document.body.style.zoom = (isNaN(+document.body.style.zoom) ? 1 : parseFloat(document.body.style.zoom)) + 0.1 * repeats;
   },
   zoomPageOut: function(repeats) {
-    document.body.style.zoom = (isNaN(parseInt(document.body.style.zoom)) ? 1 : parseFloat(document.body.style.zoom)) - 0.1 * repeats;
+    document.body.style.zoom = (isNaN(+document.body.style.zoom) ? 1 : parseFloat(document.body.style.zoom)) - 0.1 * repeats;
   },
   zoomOrig: function() {
     document.body.style.zoom = "1";
@@ -747,9 +747,9 @@ Mappings.convertToAction = function(c) {
         if (/^0?$/.test(Mappings.repeats)) addOne = true;
         if (Mappings.actions.hasOwnProperty(key)) {
           if (key === "shortCuts") {
-            Mappings.actions[key](Mappings.queue, (addOne ? 1 : parseInt(Mappings.repeats)));
+            Mappings.actions[key](Mappings.queue, (addOne ? 1 : +Mappings.repeats));
           } else {
-            Mappings.actions[key]((addOne ? 1 : parseInt(Mappings.repeats)), Mappings.queue);
+            Mappings.actions[key]((addOne ? 1 : +Mappings.repeats), Mappings.queue);
           }
         }
         Mappings.queue = "";

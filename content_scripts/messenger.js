@@ -103,7 +103,9 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
       Find.lastSearch = request.value;
       break;
     case "sendSettings":
-      Command.configureSettings(request.settings);
+      if (!Command.initialLoadStarted) {
+        Command.configureSettings(request.settings);
+      }
       break;
     case "confirm":
       callback(confirm(request.message));

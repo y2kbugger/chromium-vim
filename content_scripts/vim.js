@@ -362,7 +362,7 @@ Vim.onKeyDown = function(ev, nocode) {
 
   var command = Vim.bindings[Vim.keyQueue];
   Vim.keyQueue = "";
-  Vim.repeatCount = Vim.repeatCount ? parseInt(Vim.repeatCount) : 1;
+  Vim.repeatCount = Vim.repeatCount ? +Vim.repeatCount : 1;
   for (var i = 0; i < Vim.repeatCount; ++i) {
     Vim[command[0]](command[1]);
   }
