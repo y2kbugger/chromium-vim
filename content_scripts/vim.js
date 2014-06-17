@@ -9,6 +9,7 @@ Vim.init = function(el) {
   this.setMode("NORMAL");
   this.el.focus();
   this.el.setAttribute("vimmode", true);
+  this.el.setAttribute("autocomplete", "off");
   this.el.setAttribute("vimmodeinactive", true);
   this.el.setAttribute("mode", "NORMAL");
   this.bindingArray = Object.keys(this.bindings);
@@ -351,9 +352,6 @@ Vim.onKeyDown = function(ev, nocode) {
   }
   if (!Vim.matchQueue()) {
     Vim.keyQueue = "";
-    // if (Mappings.convertToAction(key)) {
-    //   document.activeElement.blur();
-    // }
     return;
   }
   if (Vim.bindingArray.indexOf(Vim.keyQueue) === -1) {
