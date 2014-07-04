@@ -489,6 +489,9 @@ Mappings.actions = {
     if (!Command.domElementsLoaded) {
       return false;
     }
+    if (!window.isContentFrame) {
+      return chrome.runtime.sendMessage({action: 'sendKeySequence', keys: Mappings.queue, frameIndex: +Frames.index});
+    }
     for (var i = 0, l = Mappings.shortCuts.length; i < l; i++) {
       if (s === Mappings.shortCuts[i][0]) {
         commandMode = true;
@@ -514,18 +517,23 @@ Mappings.actions = {
     }
   },
   openSearchBar: function() {
-    Command.hide();
-    Find.lastIndex = Find.index;
-    if (document && document.body) {
-      Command.lastScrollTop = document.body.scrollTop;
+    if (!window.isContentFrame) {
+      Find.lastIndex = Find.index;
+      Find.previousMatches = Find.matches.length > 0;
+      Find.swap = false;
+      if (document && document.body) {
+        Command.lastScrollTop = document.body.scrollTop;
+      }
+      return chrome.runtime.sendMessage({action: 'sendKeySequence', keys: Mappings.queue, frameIndex: +Frames.index});
     }
     commandMode = true;
-    Find.previousMatches = Find.matches.length > 0;
-    Find.swap = false;
     return Command.show('/');
   },
   openSearchBarReverse: function() {
-    Command.hide();
+    if (!window.isContentFrame) {
+      return chrome.runtime.sendMessage({action: 'sendKeySequence', keys: Mappings.queue, frameIndex: +Frames.index});
+    }
+    // Command.hide();
     Find.lastIndex = Find.index;
     commandMode = true;
     if (document && document.body) {
@@ -536,9 +544,12 @@ Mappings.actions = {
     return Command.show('?');
   },
   openCommandBar: function() {
-    Command.hide();
-    commandMode = true;
-    return Command.show(false);
+    if (window.isContentFrame) {
+      commandMode = true;
+      return Command.show(false);
+    } else {
+      chrome.runtime.sendMessage({action: 'sendKeySequence', keys: Mappings.queue, frameIndex: +Frames.index});
+    }
   }
 
 };
@@ -965,6 +976,10 @@ Mappings.handleEscapeKey = function() {
     return document.activeElement.blur();
   }
 
+  if (window.isContentFrame === true) {
+    return;
+  }
+
   if (Hints.active) {
     return Hints.hideHints(false, false);
   }
@@ -994,7 +1009,7 @@ Mappings.convertToAction = function(c) {
   if (!c || c.trim() === '') {
     return false;
   }
-  if (Hints.active) {
+  if (!window.isContentFrame && Hints.active) {
     if (settings.numerichints && c === '<Enter>') {
       if (Hints.numericMatch) {
         return Hints.dispatchAction(Hints.numericMatch);

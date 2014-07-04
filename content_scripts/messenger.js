@@ -117,7 +117,9 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
       }
       break;
     case 'updateLastSearch':
-      Find.lastSearch = request.value;
+      if (!window.isContentFrame) {
+        Find.lastSearch = request.value;
+      }
       break;
     case 'sendSettings':
       Mappings.defaults = Object.clone(Mappings.defaultsClone);
@@ -142,8 +144,26 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
       chrome.runtime.sendMessage({action: 'openLinkTab', active: false, url: 'data:text/html;charset=utf-8;base64,' + window.btoa(reverseImagePost(request.data, null)), noconvert: true});
       break;
     case 'focusFrame':
-      if (request.index === Frames.index) {
-        Frames.focus();
+      if (window.iframe) {
+        iframe.style.display = 'none';
+      }
+      if (!window.isContentFrame && request.index === Frames.index) {
+        Frames.focus(request.highlight);
+        if (request.highlight) {
+          iframe.style.display = 'none';
+        }
+      }
+      break;
+    case 'sendHighlight':
+      if (!window.isContentFrame && request.index === Frames.index) {
+        Find.clear();
+        request.params.base = document.body;
+        Find.highlight(request.params);
+        port.postMessage({
+          action: 'updateLastSearch',
+          value: Find.lastSearch
+        });
+        // Find.search(false, 1);
       }
       break;
     case 'sessions':
@@ -151,10 +171,13 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
       break;
     case 'nextCompletionResult':
       if (settings.cncpcompletion && Command.type === 'action' && commandMode && document.activeElement.id === 'cVim-command-bar-input') {
-        Search.nextResult();
+        if (window.isContentFrame) {
+          Search.nextResult();
+        } else {
+          callback(true);
+        }
         break;
-      }
-      if (window.self === window.top) {
+      } else if (window.isContentFrame) {
         callback(true);
       }
       break;
@@ -183,6 +206,19 @@ chrome.extension.onMessage.addListener(function(request, sender, callback) {
       break;
     case 'alert':
       alert(request.message);
+      break;
+    case 'displayIframe':
+      if (window.iframe) {
+        iframe.style.display = 'block';
+      }
+      break;
+    case 'sendKeySequence':
+      if (window.isContentFrame) {
+        window.focus();
+        window.setTimeout(function() {
+          Mappings.convertToAction(request.keys);
+        });
+      }
       break;
   }
 });

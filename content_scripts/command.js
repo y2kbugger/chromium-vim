@@ -722,6 +722,7 @@ Command.show = function(search, value) {
 };
 
 Command.hide = function(callback) {
+  chrome.runtime.sendMessage({action: 'focusLastFrame'});
   if (document.activeElement) {
     document.activeElement.blur();
   }
@@ -776,7 +777,7 @@ Command.onDOMLoad = function() {
     this.data.style[(!this.onBottom) ? 'bottom' : 'top'] = '';
     this.data.style[(this.onBottom) ? 'bottom' : 'top'] = '20px';
   }
-  if (!settings.autofocus) {
+  if (!settings.autofocus && !window.isContentFrame) {
     var manualFocus = false;
     var initialFocus = window.setInterval(function() {
       if (document.activeElement) {
@@ -797,7 +798,9 @@ Command.onDOMLoad = function() {
       document.removeEventListener('mousedown', initialMouseDown, true);
     }, true);
   }
-  this.setup();
+  if (window.isContentFrame) {
+    this.setup();
+  }
   this.domElementsLoaded = true;
 };
 
@@ -838,8 +841,10 @@ Command.init = function(enabled) {
     if (settings.autohidecursor) {
       waitForLoad(Cursor.init, Cursor);
     }
-    Scroll.smoothScroll = settings.smoothscroll;
-    Scroll.stepSize = +settings.scrollstep;
+    if (!window.isContentFrame) {
+      Scroll.smoothScroll = settings.smoothscroll;
+      Scroll.stepSize = +settings.scrollstep;
+    }
     if (settings.hintcharacters.split('').unique().length > 1) {
       settings.hintcharacters = settings.hintcharacters.split('').unique().join('');
     }

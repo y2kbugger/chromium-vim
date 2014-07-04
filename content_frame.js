@@ -1,0 +1,1 @@
+window.isContentFrame = true;

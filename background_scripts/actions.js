@@ -70,6 +70,20 @@ actions.openLinkTab = function() {
   }
 };
 
+actions.sendKeySequence = function() {
+  Frames[sender.tab.id].index = request.frameIndex;
+  chrome.tabs.sendMessage(sender.tab.id, {action: 'displayIframe'});
+  chrome.tabs.sendMessage(sender.tab.id, {action: 'sendKeySequence', keys: request.keys});
+};
+
+actions.sendHighlight = function() {
+  chrome.tabs.sendMessage(sender.tab.id, {action: 'sendHighlight', index: Frames[sender.tab.id].index, params: request.params});
+};
+
+actions.focusLastFrame = function() {
+  chrome.tabs.sendMessage(sender.tab.id, {action: 'focusFrame', index: Frames[sender.tab.id].index, highlight: false});
+};
+
 actions.addFrame = function() {
   if (Frames[sender.tab.id] === void 0 || request.isRoot) {
     Frames[sender.tab.id] = {

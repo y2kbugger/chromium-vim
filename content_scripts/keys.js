@@ -101,7 +101,7 @@ Key.down = function(e) {
 
   var asciiKey, escapeKey, isInput;
 
-  if (Hints.active) {
+  if (!window.isContentFrame && Hints.active) {
     e.stopPropagation();
     if (e.which === 18) {
       return Hints.changeFocus();
@@ -109,18 +109,18 @@ Key.down = function(e) {
       e.preventDefault();
       return document.getElementById('cVim-link-container').style.opacity = '0';
     }
-  }
 
-  if (Hints.keyDelay) {
-    e.stopPropagation();
-    return e.preventDefault();
+    if (Hints.keyDelay) {
+      e.stopPropagation();
+      return e.preventDefault();
+    }
   }
 
   if ((e.which >= 16 && e.which <= 18) || e.which === 91 || e.which === 123) {
     return false;
   }
 
-  if (Cursor.overlay && settings.autohidecursor) {
+  if (!window.isContentFrame && Cursor.overlay && settings.autohidecursor) {
     Cursor.overlay.style.display = 'block';
     Cursor.wiggleWindow();
   }
@@ -137,7 +137,7 @@ Key.down = function(e) {
 
   escapeKey = asciiKey === '<Esc>' || asciiKey === '<C-[>';
 
-  if (Visual.caretModeActive || Visual.visualModeActive) {
+  if (!window.isContentFrame && (Visual.caretModeActive || Visual.visualModeActive)) {
     e.stopPropagation();
     Visual.selection = document.getSelection();
     if (e.which === 8) {
@@ -235,27 +235,18 @@ Key.down = function(e) {
         }
 
         if (Command.input.value) {
-          if (Command.input.value !== Find.lastSearch || !Find.matches.length) {
-            Find.clear();
-            Find.highlight({
-              base: document.body,
+          chrome.runtime.sendMessage({
+            action: 'sendHighlight',
+            params: {
               search: Command.input.value,
               setIndex: true,
-              executeSearch: false,
+              executeSearch: true,
               reverse: asciiKey === '<C-Enter>',
               saveSearch: true
-            });
-          }
+            }
+          });
         }
-
         Command.hide();
-        Find.index = Command.modeIdentifier.textContent === '/' ? -1 : 1;
-        Find.setIndex();
-        Find.search(Command.modeIdentifier.textContent === '?', 1, true);
-        port.postMessage({
-          action: 'updateLastSearch',
-          value: Find.lastSearch
-        });
         break;
       default:
         if (asciiKey === '<BS>' && Command.input.value.length === 0) {
@@ -269,15 +260,17 @@ Key.down = function(e) {
             return Command.complete(Command.input.value);
           }
           if (Command.input.value.length > 2) {
-            if (settings.incsearch && (Command.input.value !== Find.lastSearch || !Find.highlights.length)) {
-              Find.clear();
-              Find.highlight({
-                base: document.body,
-                search: Command.input.value
+            if (settings.incsearch) {
+              chrome.runtime.sendMessage({
+                action: 'sendHighlight',
+                params: {
+                  search: Command.input.value,
+                  setIndex: false,
+                  executeSearch: false,
+                  reverse: asciiKey === '<C-Enter>',
+                  saveSearch: false
+                }
               });
-              Find.index = Command.modeIdentifier.textContent === '/' ? -1 : 1;
-              Find.setIndex();
-              Find.search(Command.modeIdentifier.textContent === '?', 1, true);
             }
           }
         }, 0);
@@ -323,9 +316,11 @@ Key.press = function(e) {
 
 removeListeners = function() {
   Key.listenersActive = false;
-  document.removeEventListener('keypress', Key.press, true);
-  document.removeEventListener('keyup', Key.up, true);
   document.removeEventListener('keydown', Key.down, true);
+  if (!window.isContentFrame) {
+    document.removeEventListener('keypress', Key.press, true);
+    document.removeEventListener('keyup', Key.up, true);
+  }
 };
 
 addListeners = function() {
@@ -333,9 +328,11 @@ addListeners = function() {
     removeListeners();
   }
   Key.listenersActive = true;
-  document.addEventListener('keypress', Key.press, true);
-  document.addEventListener('keyup', Key.up, true);
   document.addEventListener('keydown', Key.down, true);
+  if (!window.isContentFrame) {
+    document.addEventListener('keyup', Key.up, true);
+    document.addEventListener('keypress', Key.press, true);
+  }
 };
 
 addListeners();
@@ -357,7 +354,6 @@ Key.toggleCvim = function(ev) {
 document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', Key.toggleCvim, true);
 });
-
 window.addEventListener('DOMContentLoaded', function() {
   if (self === top) {
     chrome.runtime.sendMessage({action: 'isNewInstall'}, function(message) {
@@ -365,5 +361,17 @@ window.addEventListener('DOMContentLoaded', function() {
         alert(message);
       }
     });
+    iframe = document.createElement('iframe');
+    iframe.src = chrome.extension.getURL('content_frame.html');
+    iframe.style.position = 'fixed';
+    iframe.style.zIndex = '9999';
+    iframe.width = '100%';
+    iframe.height = '100%';
+    iframe.style.top = '0';
+    iframe.style.display = 'none';
+    // iframe.style.pointerEvents = 'none';
+    iframe.style.border = '0';
+    iframe.setAttribute('seamless', '');
+    document.lastChild.appendChild(iframe);
   }
 });
